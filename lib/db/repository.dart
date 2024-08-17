@@ -58,7 +58,6 @@ final class DB {
       return;
     }
     _rmByID(id);
-
   }
   void _rmByID(Id id) {
     try {
@@ -74,6 +73,14 @@ final class DB {
     }
   }
 
+  int countSecrets() {
+    try {
+      return _db!.secrets.countSync();
+    } catch(e, _) {
+      _onTxError(e, "failed to count secrets");
+      return 0;
+    }
+  }
   void _onTxError(Object? e, msg) {
     _logger.e("msg", error: e);
     _stateController.sink.add(DBState.txFail);

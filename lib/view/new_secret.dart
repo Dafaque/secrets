@@ -35,6 +35,7 @@ class NewSecretView extends StatelessWidget {
                     decoration: const InputDecoration(labelText:"Title"),
                     controller: _titleTEC,
                     validator: _titleValidator,
+                    autofocus: true,
                   ),
                   TextFormField(
                     decoration: const InputDecoration(labelText:"Value"),
