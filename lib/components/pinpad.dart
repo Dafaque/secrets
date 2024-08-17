@@ -14,6 +14,7 @@ class _PinPadState extends State<PinPad> {
   String _pin = "";
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -24,7 +25,7 @@ class _PinPadState extends State<PinPad> {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: _pins(),
+              children: _pins(cs),
             ),
           ),
           PinKeyboard(
@@ -33,7 +34,8 @@ class _PinPadState extends State<PinPad> {
             enableBiometric: false,
             // controller: widget._controller,
             onConfirm: widget._onConfirm,
-            iconBackspace: const Icon(Icons.backspace),
+            iconBackspace: Icon(Icons.backspace, color: cs.secondary,),
+            textColor: cs.secondary,
           )
         ],
       ),
@@ -46,15 +48,15 @@ class _PinPadState extends State<PinPad> {
     });
   }
 
-  List<Icon> _pins() {
+  List<Icon> _pins(ColorScheme cs) {
     final int pinLen = _pin.length;
     return List<Icon>.generate(
       widget._pinLen,
         (int idx) {
           if (idx+1 > pinLen) {
-            return const Icon(Icons.circle_outlined);
+            return Icon(Icons.circle_outlined, color: cs.secondaryContainer,);
           }
-          return const Icon(Icons.circle);
+          return Icon(Icons.circle, color: cs.secondary);
         }
     );
 

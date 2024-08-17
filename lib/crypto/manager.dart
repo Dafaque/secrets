@@ -31,7 +31,7 @@ class EncryptionManager {
     try {
       Digest digest = sha256.convert(pin.runes.toList());
       _key = Key.fromUtf8(digest.toString().substring(0,32));
-      final String encrypted = _encryptAES(encFileContent);
+      final String encrypted = encryptAES(encFileContent);
 
       final File encFile = File(_getEncFilePath());
       encFile.writeAsString(encrypted);
@@ -49,7 +49,7 @@ class EncryptionManager {
       _key = Key.fromUtf8(digest.toString().substring(0,32));
       final File encFile = File(_getEncFilePath());
       final String content = await encFile.readAsString();
-      final paramsStr = _decryptAES(content);
+      final paramsStr = decryptAES(content);
       if (!paramsStr.startsWith("iv=")) {
         throw "Corrupted .enc file";
       }
@@ -69,11 +69,11 @@ class EncryptionManager {
     }
     return "$basePath/.enc";
   }
-  String _encryptAES(String text) {
+  String encryptAES(String text) {
     return Encrypter(AES(_key)).encrypt(text, iv: _iv).base64;
   }
 
-  String _decryptAES(String b64cipher) {
+  String decryptAES(String b64cipher) {
     return Encrypter(AES(_key)).decrypt(Encrypted.fromBase64(b64cipher), iv: _iv);
   }
 

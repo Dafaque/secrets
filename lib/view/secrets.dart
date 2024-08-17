@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:secrets/components/dismissible.dart';
+import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/repository.dart';
 import 'package:secrets/db/secret.dart';
 import 'package:secrets/view/new_secret.dart';
+import 'package:secrets/view/secret.dart';
 
 class SecretsView extends StatefulWidget {
   final DB _db;
-  const SecretsView(this._db, {super.key});
+  final EncryptionManager _enc;
+  const SecretsView(this._db, this._enc, {super.key});
 
   @override
   State<SecretsView> createState() => _SecretsViewState();
@@ -47,6 +50,9 @@ class _SecretsViewState extends State<SecretsView> {
         leading: Icon(leadingIcon),
         title: Text(s.title ?? "unset"),
         style: ListTileStyle.list,
+        onTap: () {
+          _showSecretSheet(s);
+        },
       )),
       _onTileDismissed,
     );
@@ -92,7 +98,13 @@ class _SecretsViewState extends State<SecretsView> {
   void _showNewSecretSheet() {
     showBottomSheet(
         context: context,
-        builder: (_) => NewSecretView(widget._db),
+        builder: (_) => NewSecretView(widget._db, widget._enc),
+    );
+  }
+  void _showSecretSheet(Secret s) {
+    showBottomSheet(
+        context: context,
+        builder: (_) => SecretView(widget._enc, s),
     );
   }
 

@@ -108,7 +108,7 @@ class _MainViewState extends State<MainView> {
   Widget _build() {
     switch (_loadingState) {
       case _ViewState.ready:
-        return SecretsView(widget._db);
+        return SecretsView(widget._db, widget._enc);
       case _ViewState.error:
         return Center(
           child: Text(_errMsg ?? "unknown error"),
