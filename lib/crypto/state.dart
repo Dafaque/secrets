@@ -1,0 +1,1 @@
+enum EMState {loading, noInitialized, initialized, failed, ready}

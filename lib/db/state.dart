@@ -1,0 +1,1 @@
+enum DBState {loading, failed, ready, txOk, txFail, closed}
