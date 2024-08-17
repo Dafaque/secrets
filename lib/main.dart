@@ -5,7 +5,8 @@ import 'package:secrets/preferences/manager.dart';
 import 'package:secrets/db/repository.dart';
 import 'package:secrets/view/main.dart';
 
-const primaryColor = Color(0xFFffb3b4);
+// https://material-foundation.github.io/material-theme-builder/
+const primaryColor = Color(0xFFb0f953);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,42 +48,46 @@ class Entry extends StatelessWidget {
         primaryColor: primaryColor,
         colorScheme: const ColorScheme(
           brightness: Brightness.dark,
-          primary: primaryColor,
-          onPrimary: Color(0xFF561d22),
-          primaryContainer: Color(0xFF733337),
-          onPrimaryContainer: Color(0xFFffdada),
-          secondary: Color(0xFFe6bdbd),
-          onSecondary: Color(0xFF44292a),
-          secondaryContainer: Color(0xFF5d3f40),
-          onSecondaryContainer: Color(0xFFffdada),
-          tertiary: Color(0xFFe6c18d),
-          onTertiary: Color(0xFF422c05),
-          tertiaryContainer: Color(0xFF5b421a),
-          onTertiaryContainer: Color(0xFFffddb0),
 
-          surface: Color(0xFF1a1111),
-          onSurface: Color(0xFFf0dede),
-          surfaceDim: Color(0xFF1a1111),
-          surfaceBright: Color(0xFF413737),
-          surfaceContainerLowest: Color(0xFF140c0c),
-          surfaceContainerLow: Color(0xFF221919),
-          surfaceContainer: Color(0xFF271d1d),
-          surfaceContainerHigh: Color(0xFF322828),
-          surfaceContainerHighest: Color(0xFF3d3232),
-          onSurfaceVariant: Color(0xFFd7c1c1),
-          outline: Color(0xFF9f8c8c),
-          outlineVariant: Color(0xFF524343),
-          scrim: Color(0xFF000000),
-          shadow: Color(0xFF000000),
-          inverseSurface: Color(0xFFf0dede),
-          onInverseSurface: Color(0xFF382e2e),
-          inversePrimary: Color(0xFF8f4a4d),
-          // surfaceTint: Color(0xFFFFFFFF),
+          primary: primaryColor,
+          onPrimary: Color(0xFF1f3700),
+          primaryContainer: Color(0xFF88cd29),
+          onPrimaryContainer: Color(0xFF1d3300),
+          secondary: Color(0xFFadd27e),
+          onSecondary: Color(0xFF1f3700),
+          secondaryContainer: Color(0xFF284500),
+          onSecondaryContainer: Color(0xFFb7dd87),
+          tertiary: Color(0xFF73ffa6),
+          onTertiary: Color(0xFF00391c),
+          tertiaryContainer: Color(0xFF00d678),
+          onTertiaryContainer: Color(0xFF00361a),
+
+          surfaceDim: Color(0xFF10150b),
+          surface: Color(0xFF10150b),
+          surfaceBright: Color(0xFF363b2f),
+          surfaceContainerLowest: Color(0xFF0b1006),
+          surfaceContainerLow: Color(0xFF191d12),
+          surfaceContainer: Color(0xFF1d2116),
+          surfaceContainerHigh: Color(0xFF272c20),
+          surfaceContainerHighest: Color(0xFF32362a),
+          onSurface: Color(0xFFe0e4d3),
+          onSurfaceVariant: Color(0xFFc1cab1),
+          outline: Color(0xFF8c947d),
+          outlineVariant: Color(0xFF424937),
+
+
+          inverseSurface: Color(0xFFe0e4d3),
+          onInverseSurface: Color(0xFF2d3226),
+          inversePrimary: Color(0xFF406900),
 
           error: Color(0xFFffb4ab),
           onError: Color(0xFF690005),
           errorContainer: Color(0xFF93000a),
           onErrorContainer: Color(0xFFffdad6),
+
+          scrim: Color(0xFF000000),
+          shadow: Color(0xFF000000),
+          // surfaceTint: Color(0xFFFFFFFF),
         )
       ),
 
