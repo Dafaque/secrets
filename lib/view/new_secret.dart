@@ -42,18 +42,22 @@ class NewSecretView extends StatelessWidget {
                     controller: _valueTEC,
                     validator: _valueValidator,
                   ),
-                  TextButton(onPressed: () {
-                    if (!(_formKey.currentState?.validate() ?? false)) {
-                      return;
-                    }
-                    _saveSecret();
-                    Navigator.of(context).pop();
-                  }, child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                       Text("Save")
-                  ],)),
+                  TextButton(
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Save")
+                      ],
+                    ),
+                    onPressed: () {
+                      if (!(_formKey.currentState?.validate() ?? false)) {
+                        return;
+                      }
+                      _saveSecret();
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ],
               ),
               const Padding(

@@ -143,6 +143,7 @@ class _MainViewState extends State<MainView> {
   void _showSnackBar(String msg){
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: const Duration(milliseconds: 1500),
           content: Text(msg),
         )
     );

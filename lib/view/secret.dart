@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/secret.dart';
+import 'package:spoiler_widget/spoiler_text_widget.dart';
 
 class SecretView extends StatefulWidget {
   final Secret _secret;
@@ -34,7 +35,19 @@ class _SecretViewState extends State<SecretView> {
         body: Card(
           child: ListTile(
             title: const Text("Value"),
-            subtitle: Text(val),
+            subtitle: RepaintBoundary(
+              child: SpoilerTextWidget(
+                enable: true,
+                maxParticleSize: 1.5,
+                particleDensity: .4,
+                speedOfParticles: 0.3,
+                fadeRadius: 3,
+                fadeAnimation: true,
+                enableGesture: true,
+                selection: TextSelection(baseOffset: 0, extentOffset: val.length),
+                text: val,
+              ),
+            ),
             trailing: const Icon(Icons.copy),
             onTap: () {
               Clipboard.setData(
