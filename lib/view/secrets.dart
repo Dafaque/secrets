@@ -17,7 +17,7 @@ class SecretsView extends StatefulWidget {
 
 class _SecretsViewState extends State<SecretsView> {
   List<Secret>? _secrets;
-  int totalSecrets = 0;
+  int _totalSecrets = 0;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -48,7 +48,11 @@ class _SecretsViewState extends State<SecretsView> {
   }
   @override
   void initState() {
-    totalSecrets = widget._db.countSecrets();
+    widget._db.countSecrets().then((int secretsCount) {
+      setState(() {
+        _totalSecrets = secretsCount;
+      });
+    });
     super.initState();
   }
   void _search(String query) {
@@ -58,9 +62,10 @@ class _SecretsViewState extends State<SecretsView> {
       });
       return;
     }
-    setState(() {
-      _secrets = widget._db.listSecrets(query);
-      totalSecrets = widget._db.countSecrets();
+    widget._db.listSecrets(query).then((List<Secret> secrets) {
+      setState(() {
+        _secrets = secrets;
+      });
     });
   }
   void _showNewSecretSheet() {
@@ -69,15 +74,29 @@ class _SecretsViewState extends State<SecretsView> {
         context: context,
         builder: (_) => Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: NewSecretView(widget._db, widget._enc),
+          child: NewSecretView(),
         ),
-    ).then((_){
-      setState(() {
+    ).then((dynamic val){
+      Secret? s = val as Secret?;
+      if (s == null) {
+        return;
+      }
+      s.value = widget._enc.encryptAES(s.value!);
+      widget._db.createSecret(s).then((_){
         String query = _searchController.text;
         if (query.length >= 3) {
-          _secrets = widget._db.listSecrets(query);
+          widget._db.listSecrets(query).then((List<Secret> secrets) {
+            setState(() {
+              _secrets = secrets;
+            });
+          });
+          return;
         }
-        totalSecrets = widget._db.countSecrets();
+        widget._db.countSecrets().then((int countSecrets){
+          setState(() {
+            _totalSecrets = countSecrets;
+          });
+        });
       });
     });
   }
@@ -97,7 +116,7 @@ class _SecretsViewState extends State<SecretsView> {
               text: "Start typing to find among your",
               children: [
                 TextSpan(
-                    text: " $totalSecrets ",
+                    text: " $_totalSecrets ",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -115,11 +134,11 @@ class _SecretsViewState extends State<SecretsView> {
         child: Text("No secrets found"),
       );
     }
-    return Flexible(child: ListView.builder( //TODO mb remove flexible?
+    return ListView.builder(
       itemBuilder: _buildListView,
       itemCount: _secrets!.length,
       scrollDirection: Axis.vertical,
-    ));
+    );
 
   }
   Widget _buildListView(BuildContext context, int idx) {

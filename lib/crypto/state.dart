@@ -1,1 +1,1 @@
-enum EMState {loading, noInitialized, initialized, failed, ready}
+enum EMState {loading, noInitialized, initialized, failed, ready, deinitialized}

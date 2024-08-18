@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:secrets/crypto/manager.dart';
-import 'package:secrets/db/repository.dart';
 import 'package:secrets/db/secret.dart';
 
 class NewSecretView extends StatelessWidget {
-  final DB _db;
-  final EncryptionManager _enc;
   final _valueTEC = TextEditingController();
   final _titleTEC = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  NewSecretView(this._db,this._enc, {super.key});
+  NewSecretView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +50,7 @@ class NewSecretView extends StatelessWidget {
                       if (!(_formKey.currentState?.validate() ?? false)) {
                         return;
                       }
-                      _saveSecret();
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(_buildSecret());
                     },
                   ),
                 ],
@@ -83,13 +78,12 @@ class NewSecretView extends StatelessWidget {
     );
   }
 
-  void _saveSecret() {
-    Secret s = Secret()
+  Secret _buildSecret() {
+    return Secret()
         ..title=_titleTEC.text
-        ..value=_enc.encryptAES(_valueTEC.text)
+        ..value=_valueTEC.text
         ..createdUTC=DateTime.now()
         ..type=SecretType.text;
-    _db.addSecret(s);
   }
 
   String? _titleValidator(String? val) {

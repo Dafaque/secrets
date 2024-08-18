@@ -31,58 +31,58 @@ final class DB {
     _stateController.sink.add(DBState.ready);
   }
 
-  List<Secret> listSecrets(String title) {
-    return _db!.secrets.filter().titleContains(title).findAllSync();
+  Future<List<Secret>> listSecrets(String title) {
+    return _db!.secrets.filter().titleContains(title).findAll();
   }
 
-  void addSecret(Secret s) {
-    try {
-      _db!.writeTxn(() async {
-        _db!.secrets.put(s);
-      }).then((_){
-        _stateController.sink.add(DBState.txOk);
-      }).onError((e, _){
-        _onTxError(e, "failed to add secret");
-      });
-    } catch (e, _) {
-      _onTxError(e, "failed to add secret");
+  Future<void> createSecret(Secret s) {
+    if (_db == null) {
+      return Future<void>((){});
     }
+    return _db!.writeTxn(() async {
+      return _db!.secrets.put(s);
+    }).then((_){
+      _stateController.sink.add(DBState.txOk);
+    }).onError((e, _){
+      _onTxError(e, "failed to add secret");
+    });
   }
 
-  void deleteSecret(String strId) {
+  Future<void> deleteSecret(String strId) {
     Id id;
     try {
       id = Id.parse(strId);
     } catch(e, _) {
       _onTxError(e, "failed to parse id");
-      return;
+      return Future<void>((){});
     }
-    _rmByID(id);
-  }
-  void _rmByID(Id id) {
-    try {
-      _db!.writeTxn(() async {
-        _db!.secrets.delete(id);
-      }).then((_){
-        _stateController.sink.add(DBState.txOk);
-      }).onError((e, _){
-        _onTxError(e, "failed to rm secret");
-      });
-    } catch (e, _) {
-      _onTxError(e, "failed to rm secret");
-    }
+    return _rmByID(id);
   }
 
-  int countSecrets() {
+  Future<void> _rmByID(Id id) {
+    if (_db == null) {
+      _onTxError(null, "failed to rm secret; _db is null");
+      return Future<void>((){});
+    }
+    return _db!.writeTxn(() async {
+      return _db!.secrets.delete(id);
+    }).then((_){
+      _stateController.sink.add(DBState.txOk);
+    }).onError((e, _){
+      _onTxError(e, "failed to rm secret");
+    });
+  }
+
+  Future<int> countSecrets() {
     try {
-      return _db!.secrets.countSync();
+      return _db!.secrets.count();
     } catch(e, _) {
-      _onTxError(e, "failed to count secrets");
-      return 0;
+      _logger.e("failed to count secrets", error: e);
+      return Future<int>(()=> 0);
     }
   }
   void _onTxError(Object? e, msg) {
-    _logger.e("msg", error: e);
+    _logger.e(msg, error: e);
     _stateController.sink.add(DBState.txFail);
   }
   Stream<DBState> getStateStream() {

@@ -41,6 +41,7 @@ class EncryptionManager {
       return;
     }
     _iv = IV.fromUtf8(ivString);
+    _stateController.sink.add(EMState.ready);
   }
 
   void open(String pin) async {
@@ -72,15 +73,18 @@ class EncryptionManager {
   String encryptAES(String text) {
     return Encrypter(AES(_key)).encrypt(text, iv: _iv).base64;
   }
-
   String decryptAES(String b64cipher) {
     return Encrypter(AES(_key)).decrypt(Encrypted.fromBase64(b64cipher), iv: _iv);
   }
-
   Stream<EMState> getStateStream() {
     return _stateController.stream;
   }
   void done() {
     _stateController.close();
+  }
+  void drop(){
+    File f = File(_getEncFilePath());
+    f.deleteSync();
+    _stateController.sink.add(EMState.deinitialized);
   }
 }

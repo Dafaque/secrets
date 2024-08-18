@@ -3,30 +3,30 @@ import 'package:secrets/components/pinpad.dart';
 
 class UnlockView extends StatefulWidget {
   final int _try;
-  const UnlockView(this._try, {super.key});
+  final int _dropAfter;
+  const UnlockView(this._try, this._dropAfter, {super.key});
   @override
   State<UnlockView> createState() => _UnlockViewState();
 }
 const _messageEnterPassCode = "Enter Passcode";
-const _messageEnterPassCodeAgain = "Enter Passcode again";
-const _messageTooShort = "Passcode too short";
+const _messageAttemptsLeft = "attempts left";
 
 const int _pinLen = 6;
 class _UnlockViewState extends State<UnlockView> {
-  String _message = _messageEnterPassCode;
-
+  String _title = _messageEnterPassCode;
+  final PinPadController _controller = PinPadController();
   @override
   Widget build(BuildContext context) {
-    if (_message != _messageTooShort && widget._try > 0) {
-      _message = _messageEnterPassCodeAgain;
+    if (widget._try > 0) {
+      _title = "${widget._dropAfter - widget._try} $_messageAttemptsLeft";
     }
     return Scaffold(
         appBar: AppBar(
-          title: Text(_message),
+          title: Text(_title),
           automaticallyImplyLeading: false,
           centerTitle: true,
         ),
-        body: PinPad(_pinLen, _onComplete),
+        body: PinPad(_pinLen, _controller, _onComplete),
     );
   }
 
@@ -35,12 +35,6 @@ class _UnlockViewState extends State<UnlockView> {
     super.dispose();
   }
   void _onComplete(String? pin) {
-    if (pin == null || pin.length < _pinLen) {
-      setState(() {
-        _message = _messageTooShort;
-      });
-      return;
-    }
     Navigator.of(context).pop(pin);
   }
 }

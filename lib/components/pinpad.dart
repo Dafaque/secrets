@@ -3,15 +3,20 @@ import 'package:pin_keyboard/pin_keyboard.dart';
 
 class PinPad extends StatefulWidget {
   final int _pinLen;
+  final PinPadController _controller;
   final Function(String?) _onConfirm;
-  const PinPad(this._pinLen, this._onConfirm, {super.key});
-
+  const PinPad(this._pinLen, this._controller, this._onConfirm, {super.key});
   @override
   State<PinPad> createState() => _PinPadState();
 }
 
 class _PinPadState extends State<PinPad> {
   String _pin = "";
+  @override
+  void initState() {
+    widget._controller.state = this;
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -41,7 +46,11 @@ class _PinPadState extends State<PinPad> {
       ),
     );
   }
-
+  void reset(){
+    setState(() {
+      _pin = "";
+    });
+  }
   void _onChange(String pin) {
     setState(() {
       _pin = pin;
@@ -61,4 +70,11 @@ class _PinPadState extends State<PinPad> {
     );
 
   }
- }
+}
+
+class PinPadController {
+  _PinPadState? state;
+  void reset(){
+    state?.reset();
+  }
+}

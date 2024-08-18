@@ -18,9 +18,15 @@ class SecretView extends StatefulWidget {
 
 class _SecretViewState extends State<SecretView> {
   String val = "decrypting...";
+  bool _secretDecrypted = true;
   @override
   void initState() {
-    val = widget._enc.decryptAES(widget._secret.value!);
+    try {
+      val = widget._enc.decryptAES(widget._secret.value!);
+    } catch (_,__) {
+      val = "Unable to decrypt this secret";
+      _secretDecrypted = false;
+    }
     super.initState();
   }
   @override
@@ -37,7 +43,7 @@ class _SecretViewState extends State<SecretView> {
             title: const Text("Value"),
             subtitle: RepaintBoundary(
               child: SpoilerTextWidget(
-                enable: true,
+                enable: _secretDecrypted,
                 maxParticleSize: 1.5,
                 particleDensity: .4,
                 speedOfParticles: 0.3,
@@ -48,13 +54,16 @@ class _SecretViewState extends State<SecretView> {
                 text: val,
               ),
             ),
-            trailing: const Icon(Icons.copy),
-            onTap: () {
-              Clipboard.setData(
-                  ClipboardData(text:val),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:  Text("Secret copied to clipboard")));
-            },
+            trailing: _secretDecrypted ?
+              IconButton(
+                icon: const Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(
+                    ClipboardData(text:val),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:  Text("Secret copied to clipboard")));
+                },
+              ) : null,
           ),
         )
     );

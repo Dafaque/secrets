@@ -12,7 +12,7 @@ import 'package:secrets/view/init.dart';
 import 'package:secrets/view/secrets.dart';
 import 'package:secrets/view/unlock.dart';
 
-enum _ViewState {loading, error, ready}
+enum _ViewState {loading, error, ready, deinitialized}
 
 class MainView extends StatefulWidget {
   final DB _db;
@@ -80,9 +80,12 @@ class _MainViewState extends State<MainView> {
         ).then(_onUnlockSheetDone);
       case EMState.loading:
       case EMState.ready:
-        _encStateSub?.cancel();
         widget._db.open();
         break;
+      case EMState.deinitialized:
+        setState(() {
+          _loadingState = _ViewState.deinitialized;
+        });
     }
   }
   
@@ -107,6 +110,10 @@ class _MainViewState extends State<MainView> {
   
   Widget _build() {
     switch (_loadingState) {
+      case _ViewState.deinitialized:
+        return const Center(
+          child:  Text("Storage deinitialized"),
+        );
       case _ViewState.ready:
         return SecretsView(widget._db, widget._enc);
       case _ViewState.error:
@@ -120,17 +127,21 @@ class _MainViewState extends State<MainView> {
         );
     }
   }
-
   Widget _buildInitSheet(BuildContext ctx) {
     return const InitView();
   }
   Widget _buildUnlockSheet(BuildContext ctx) {
-    return UnlockView(_try);
+    return UnlockView(_try, widget._prefs.dropAfter);
   }
   void _onInitSheetDone(dynamic data) {
     widget._enc.initialize(data.toString());
   }
   void _onUnlockSheetDone(dynamic data) {
+    if (_try >= widget._prefs.dropAfter-1) {
+      widget._prefs.drop();
+      widget._enc.drop();
+      return;
+    }
     _try++;
     widget._enc.open(data.toString());
   }

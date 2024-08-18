@@ -1,102 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:pinput/pinput.dart';
+import 'package:secrets/components/pinpad.dart';
 
 class InitView extends StatefulWidget {
   const InitView({super.key});
   @override
   State<InitView> createState() => _InitViewState();
 }
-const _messageEnterPassCode = "Enter Passcode";
-const _messageReEnterPassCode = "Re-Enter Passcode";
-const _messageMismatch = "Passcode mismatch";
-const _messageTooShort = "Passcode too short";
+
+const _messageEnterPin = "Create PIN";
+const _messageVerifyPin = "Verify PIN";
+const _messagePinMissmatch = "PIN does not match";
 
 const int _pinLen = 6;
 class _InitViewState extends State<InitView> {
-  final TextEditingController _inputController = TextEditingController();
-  final FocusNode _pinputFocusNode = FocusNode();
-  String _message = _messageEnterPassCode;
   String? _pin;
+  String _message = _messageEnterPin;
+  final PinPadController _controller = PinPadController();
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    _pinputFocusNode.requestFocus();
     return Scaffold(
-        body: SizedBox(
-            width: size.width,
-            height: size.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    "Creating new storage",
-                    style: TextStyle(
-                      fontSize: size.width * 0.07,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _message,
-                    style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w300, fontSize: size.width * 0.05),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(
-                  height: size.height * 0.05,
-                ),
-                Pinput(
-                  length: _pinLen,
-                  onSubmitted: _onSubmit,
-                  onCompleted: _onComplete,
-                  autofocus: true,
-                  focusNode: _pinputFocusNode,
-                  controller: _inputController,
-                  obscureText: true,
-                  obscuringCharacter: "#",
-                ),
-              ],
-            )));
+        appBar: AppBar(
+          title: Text(_message),
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+        ),
+        body: PinPad(_pinLen, _controller,_onConfirm)
+    );
   }
 
   @override
   void dispose() {
-    _inputController.dispose();
     super.dispose();
   }
-  void _onSubmit(String _) {
-    _inputController.clear();
-    setState(() {
-      _message = _messageTooShort;
-    });
-  }
-  void _onComplete(String pin) {
-    _inputController.clear();
-    if (pin.length < _pinLen) {
-      setState(() {
-        _message = _messageTooShort;
-      });
-      return;
-    }
+  void _onConfirm(String? pin) {
     if (_pin == null) {
+      _controller.reset();
       setState(() {
         _pin = pin;
-        _message = _messageReEnterPassCode;
+        _message = _messageVerifyPin;
       });
       return;
     }
     if (_pin != pin) {
+      _controller.reset();
       setState(() {
         _pin = null;
-        _message = _messageMismatch;
+        _message = _messagePinMissmatch;
       });
       return;
     }
-    _pinputFocusNode.unfocus();
     Navigator.of(context).pop(_pin);
   }
 }
