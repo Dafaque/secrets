@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:secrets/crypto/manager.dart';
-import 'package:secrets/crypto/state.dart';
-import 'package:secrets/db/repository.dart';
-import 'package:secrets/db/state.dart';
+import 'package:secrets/db/manager.dart';
 import 'package:secrets/preferences/manager.dart';
-import 'package:secrets/preferences/state.dart';
 import 'package:secrets/view/init.dart';
 import 'package:secrets/view/secrets.dart';
 import 'package:secrets/view/unlock.dart';
@@ -15,7 +13,7 @@ import 'package:secrets/view/unlock.dart';
 enum _ViewState {loading, error, ready, deinitialized}
 
 class MainView extends StatefulWidget {
-  final DB _db;
+  final StorageManager _db;
   final EncryptionManager _enc;
   final PreferencesManager _prefs;
   const MainView(
@@ -32,80 +30,32 @@ class _MainViewState extends State<MainView> {
   String? _errMsg;
   int _try = 0;
 
-  StreamSubscription<DBState>? _dbStateSub;
-  StreamSubscription<EMState>? _encStateSub;
-  StreamSubscription<PMState>? _prefsStateSub;
-
   @override
   void initState() {
-    _encStateSub = widget._enc.getStateStream().listen(_onEncState);
-    _dbStateSub = widget._db.getStateStream().listen(_onDBState);
-    _prefsStateSub = widget._prefs.getStateStream().listen(_onPrefsState);
-
-    widget._prefs.init();
+    widget._prefs.init().then((_){
+      return widget._enc.checkInitialized();
+    }).then(_encInitialize);
     super.initState();
   }
 
-  void _onPrefsState(PMState state) {
-    switch (state) {
-      case PMState.loading:
-        break;
-      case PMState.failed:
-        setState(() {
-          _loadingState = _ViewState.error;
-          _errMsg = "Failed to initialize properties";
-        });
-        break;
-      case PMState.ready:
-        _prefsStateSub?.cancel();
-        widget._enc.checkInitialized();
-        break;
-    }
-  }
-
-  void _onEncState(EMState state) {
-    switch (state) {
-      case EMState.noInitialized:
+  void _encInitialize(bool encInitialized) {
+    if (encInitialized) {
+      SchedulerBinding.instance.addPostFrameCallback((_){
         showModalBottomSheet(
-            context: context, builder: _buildInitSheet
-        ).then(_onInitSheetDone);
-        break;
-      case EMState.failed:
-      case EMState.initialized:
-        showModalBottomSheet(
-          isDismissible: true,
-          isScrollControlled: false,
+            isDismissible: true,
+            isScrollControlled: false,
             context: context,
             builder: _buildUnlockSheet
         ).then(_onUnlockSheetDone);
-      case EMState.loading:
-      case EMState.ready:
-        widget._db.open();
-        break;
-      case EMState.deinitialized:
-        setState(() {
-          _loadingState = _ViewState.deinitialized;
-        });
+      });
+      return;
     }
-  }
-  
-  void _onDBState(DBState state) {
-    switch (state) {
-      case DBState.ready:
-        setState(() {
-          _loadingState = _ViewState.ready;
-        });
-        break;
-      case DBState.txOk:
-        _showSuccessSnackBar();
-        break;
-      case DBState.txFail:
-        _showFailSnackBar();
-      case DBState.closed:
-      case DBState.failed:
-      case DBState.loading:
-        break;
-    }
+    SchedulerBinding.instance.addPostFrameCallback((_){
+      showModalBottomSheet(
+          context: context,
+          builder: _buildInitSheet
+      ).then(_onInitSheetDone);
+    });
   }
   
   Widget _build() {
@@ -133,46 +83,48 @@ class _MainViewState extends State<MainView> {
   Widget _buildUnlockSheet(BuildContext ctx) {
     return UnlockView(_try, widget._prefs.dropAfter);
   }
-  void _onInitSheetDone(dynamic data) {
-    widget._enc.initialize(data.toString());
+  void _onInitSheetDone(dynamic pin) {
+    widget._enc.initialize(pin.toString()).then((_)=>_initStorageManage()).
+      catchError((Object? e){
+        _encInitialize(false);
+    });
   }
-  void _onUnlockSheetDone(dynamic data) {
+  void _onUnlockSheetDone(dynamic pin) {
     if (_try >= widget._prefs.dropAfter-1) {
-      widget._prefs.drop();
-      widget._enc.drop();
+      widget._enc.drop().
+      then((_)=>widget._prefs.drop()).
+        then((_){
+          setState(() {
+            _loadingState = _ViewState.deinitialized;
+          });
+        });
       return;
     }
     _try++;
-    widget._enc.open(data.toString());
+    widget._enc.open(pin.toString()).then((_)=> _initStorageManage()).
+      catchError((Object? e){
+        _encInitialize(true);
+    });
   }
-  void _showSuccessSnackBar() {
-    return _showSnackBar("Secrets updated");
+  void _initStorageManage(){
+    widget._db.open().then((_){
+      setState(() {
+        _loadingState = _ViewState.ready;
+      });
+    });
   }
-  void _showFailSnackBar() {
-    return _showSnackBar("Secrets update failed");
-  }
-  void _showSnackBar(String msg){
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(milliseconds: 1500),
-          content: Text(msg),
-        )
-    );
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _build(), // This trailing comma makes auto-formatting nicer for build methods.
+      body: _build(),
     );
   }
 
   @override
   void dispose() {
-    _dbStateSub?.cancel();
     widget._db.done();
-    _prefsStateSub?.cancel();
     widget._prefs.done();
-    _encStateSub?.cancel();
     widget._enc.done();
     super.dispose();
   }

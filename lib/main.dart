@@ -2,7 +2,7 @@ import 'package:logger/logger.dart' show Logger, Level, DateTimeFormat, PrettyPr
 import 'package:flutter/material.dart';
 import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/preferences/manager.dart';
-import 'package:secrets/db/repository.dart';
+import 'package:secrets/db/manager.dart';
 import 'package:secrets/view/main.dart';
 
 // https://material-foundation.github.io/material-theme-builder/
@@ -24,13 +24,13 @@ void main() {
   );
   PreferencesManager pManager = PreferencesManager(logger);
   EncryptionManager encManager = EncryptionManager(logger, pManager);
-  DB db = DB(logger, pManager);
+  StorageManager db = StorageManager(logger, pManager);
 
   runApp(Entry(db, encManager, pManager));
 }
 
 class Entry extends StatelessWidget {
-  final DB _db;
+  final StorageManager _db;
   final EncryptionManager  _encManager;
   final PreferencesManager _pManager;
   const Entry(

@@ -1,1 +1,0 @@
-enum PMState {loading, failed, ready}

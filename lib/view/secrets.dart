@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:secrets/components/dismissible.dart';
 import 'package:secrets/crypto/manager.dart';
-import 'package:secrets/db/repository.dart';
+import 'package:secrets/db/manager.dart';
 import 'package:secrets/db/secret.dart';
 import 'package:secrets/view/new_secret.dart';
 import 'package:secrets/view/secret.dart';
 
 class SecretsView extends StatefulWidget {
-  final DB _db;
+  final StorageManager _db;
   final EncryptionManager _enc;
   const SecretsView(this._db, this._enc, {super.key});
 
@@ -82,7 +82,9 @@ class _SecretsViewState extends State<SecretsView> {
         return;
       }
       s.value = widget._enc.encryptAES(s.value!);
-      widget._db.createSecret(s).then((_){
+      widget._db.addSecret(s).then((_){
+        _showSuccessSnackBar();
+      }).then((_){
         String query = _searchController.text;
         if (query.length >= 3) {
           widget._db.listSecrets(query).then((List<Secret> secrets) {
@@ -97,8 +99,24 @@ class _SecretsViewState extends State<SecretsView> {
             _totalSecrets = countSecrets;
           });
         });
+      }).catchError((_){
+        _showFailSnackBar();
       });
     });
+  }
+  void _showSuccessSnackBar() {
+    return _showSnackBar("Secrets updated");
+  }
+  void _showFailSnackBar() {
+    return _showSnackBar("Secrets update failed");
+  }
+  void _showSnackBar(String msg){
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 1500),
+          content: Text(msg),
+        )
+    );
   }
   void _showSecretSheet(Secret s) {
     showModalBottomSheet(
@@ -107,7 +125,11 @@ class _SecretsViewState extends State<SecretsView> {
     );
   }
   void _onTileDismissed(String id) {
-    widget._db.deleteSecret(id);
+    widget._db.deleteSecret(id).then((_){
+      _showSuccessSnackBar();
+    }).catchError((_){
+      _showFailSnackBar();
+    });
   }
   Widget _content(BuildContext context) {
     if (_secrets == null) {
