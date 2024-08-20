@@ -28,9 +28,9 @@ class EncryptionManager {
     final File encFile = File(_getEncFilePath());
     return encFile.writeAsString(encrypted).then((_){
       _iv = IV.fromUtf8(ivString);
+      _logger.i("initialized");
     });
   }
-
   Future<void> open(String pin) {
     Digest digest = sha256.convert(pin.runes.toList());
     _key = Key.fromUtf8(digest.toString().substring(0,32));
@@ -41,6 +41,7 @@ class EncryptionManager {
            throw "Corrupted .enc file";
          }
          _iv = IV.fromUtf8(paramsStr.substring(3));
+         _logger.i("initialized");
       } catch(e) {
         const msg = "failed to open .enc file";
         _logger.e(msg, error: e);

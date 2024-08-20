@@ -3,13 +3,16 @@ import 'package:secrets/components/dismissible.dart';
 import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/manager.dart';
 import 'package:secrets/db/secret.dart';
+import 'package:secrets/preferences/manager.dart';
 import 'package:secrets/view/new_secret.dart';
 import 'package:secrets/view/secret.dart';
+import 'package:secrets/view/settings.dart';
 
 class SecretsView extends StatefulWidget {
   final StorageManager _db;
   final EncryptionManager _enc;
-  const SecretsView(this._db, this._enc, {super.key});
+  final PreferencesManager _prefs;
+  const SecretsView(this._db, this._enc, this._prefs, {super.key});
 
   @override
   State<SecretsView> createState() => _SecretsViewState();
@@ -35,8 +38,8 @@ class _SecretsViewState extends State<SecretsView> {
             ),
             onChanged: _search,
           ),
-          actions: const [
-            IconButton(onPressed: null, icon: Icon(Icons.settings))
+          actions: [
+            IconButton(onPressed: _showSettingsModal, icon: Icon(Icons.settings))
           ],
         ),
         body: _content(context),
@@ -55,18 +58,8 @@ class _SecretsViewState extends State<SecretsView> {
     });
     super.initState();
   }
-  void _search(String query) {
-    if (query.length < 3) {
-      setState(() {
-        _secrets = null;
-      });
-      return;
-    }
-    widget._db.listSecrets(query).then((List<Secret> secrets) {
-      setState(() {
-        _secrets = secrets;
-      });
-    });
+  void _search(String _) {
+    _updateData();
   }
   void _showNewSecretSheet() {
     showModalBottomSheet(
@@ -85,22 +78,25 @@ class _SecretsViewState extends State<SecretsView> {
       widget._db.addSecret(s).then((_){
         _showSuccessSnackBar();
       }).then((_){
-        String query = _searchController.text;
-        if (query.length >= 3) {
-          widget._db.listSecrets(query).then((List<Secret> secrets) {
-            setState(() {
-              _secrets = secrets;
-            });
-          });
-          return;
-        }
-        widget._db.countSecrets().then((int countSecrets){
-          setState(() {
-            _totalSecrets = countSecrets;
-          });
-        });
+        _updateData();
       }).catchError((_){
         _showFailSnackBar();
+      });
+    });
+  }
+  Future<void> _updateData() {
+    String query = _searchController.text;
+    if (query.length >= 3) {
+      return widget._db.listSecrets(query).then((List<Secret> secrets) {
+        setState(() {
+          _secrets = secrets;
+        });
+      });
+    }
+    return widget._db.countSecrets().then((int countSecrets){
+      setState(() {
+        _secrets = null;
+        _totalSecrets = countSecrets;
       });
     });
   }
@@ -183,6 +179,20 @@ class _SecretsViewState extends State<SecretsView> {
       )),
       _onTileDismissed,
     );
+  }
+  void _showSettingsModal() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext ctx) => SettingsView(widget._prefs, widget._db),
+    ).then((_){
+      widget._prefs.save().then((_){
+        return _updateData();
+      }).then((_){
+        _showSnackBar("Preferences saved");
+      }).catchError((_){
+        _showSnackBar("Failed to save preferences");
+      });
+    });
   }
 }
 

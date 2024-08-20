@@ -14,7 +14,7 @@ class _PinPadState extends State<PinPad> {
   String _pin = "";
   @override
   void initState() {
-    widget._controller.state = this;
+    widget._controller._state = this;
     super.initState();
   }
   @override
@@ -73,8 +73,8 @@ class _PinPadState extends State<PinPad> {
 }
 
 class PinPadController {
-  _PinPadState? state;
+  _PinPadState? _state;
   void reset(){
-    state?.reset();
+    _state?.reset();
   }
 }

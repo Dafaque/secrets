@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -42,18 +40,17 @@ class _MainViewState extends State<MainView> {
     if (encInitialized) {
       SchedulerBinding.instance.addPostFrameCallback((_){
         showModalBottomSheet(
-            isDismissible: true,
-            isScrollControlled: false,
-            context: context,
-            builder: _buildUnlockSheet
+          isScrollControlled: false,
+          context: context,
+          builder: _buildUnlockSheet
         ).then(_onUnlockSheetDone);
       });
       return;
     }
     SchedulerBinding.instance.addPostFrameCallback((_){
       showModalBottomSheet(
-          context: context,
-          builder: _buildInitSheet
+        context: context,
+        builder: _buildInitSheet
       ).then(_onInitSheetDone);
     });
   }
@@ -65,7 +62,7 @@ class _MainViewState extends State<MainView> {
           child:  Text("Storage deinitialized"),
         );
       case _ViewState.ready:
-        return SecretsView(widget._db, widget._enc);
+        return SecretsView(widget._db, widget._enc, widget._prefs);
       case _ViewState.error:
         return Center(
           child: Text(_errMsg ?? "unknown error"),
@@ -81,16 +78,20 @@ class _MainViewState extends State<MainView> {
     return const InitView();
   }
   Widget _buildUnlockSheet(BuildContext ctx) {
-    return UnlockView(_try, widget._prefs.dropAfter);
+    return UnlockView(_try, widget._prefs.getDropAfter());
   }
   void _onInitSheetDone(dynamic pin) {
+    if (pin == null) {
+      _encInitialize(false);
+      return;
+    }
     widget._enc.initialize(pin.toString()).then((_)=>_initStorageManage()).
       catchError((Object? e){
         _encInitialize(false);
     });
   }
   void _onUnlockSheetDone(dynamic pin) {
-    if (_try >= widget._prefs.dropAfter-1) {
+    if (_try >= widget._prefs.getDropAfter()-1) {
       widget._enc.drop().
       then((_)=>widget._prefs.drop()).
         then((_){

@@ -5,18 +5,18 @@ import 'dart:io';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
-const String _cfgFileName = "config.yml";
+const String _cfgFileName = "config.json";
 const String _dropAfterKey = "drop_after";
 const String _checkSumKey = "checksum";
+const int _defaultDropAfter = 3;
+
 
 class PreferencesManager {
   Directory _documents = Directory.current;
   final Logger _logger;
   Map<String, dynamic> _prefs = {
-    _dropAfterKey: 3,
+    _dropAfterKey: _defaultDropAfter,
   };
-
-  int dropAfter = 0;
 
   PreferencesManager(this._logger);
 
@@ -39,8 +39,6 @@ class PreferencesManager {
       }).then((String cfgFileContent){
         _prefs = jsonDecode(cfgFileContent);
         _logger.i("config file loaded: $_prefs");
-        dropAfter = _prefs[_dropAfterKey] ?? 3;
-        _logger.i("initialized");
       }).catchError((Object? e, StackTrace _){
         _logger.e("failed to init preferences", error: e);
       });
@@ -52,12 +50,7 @@ class PreferencesManager {
   }
   Future<void> drop() {
     _logger.i("deinitializing");
-    String path = _documents.path;
-    if (path.endsWith("/")) {
-      path = path.trimRight();
-    }
-    File cfg = File(_getConfigFilePath());
-    return cfg.delete();
+    return File(_getConfigFilePath()).delete();
   }
 
   String _getConfigFilePath(){
@@ -69,7 +62,22 @@ class PreferencesManager {
   }
   void done() {}
 
+  Future<void> save(){
+    return File(_getConfigFilePath()).writeAsString(jsonEncode(_prefs)).
+      catchError((Object? e){
+        const msg = "failed to save preferences";
+        _logger.e(msg, error: e);
+        throw msg;
+    });
+  }
+
   void setDropAfter(int dropAfter) {
     _prefs[_dropAfterKey] = dropAfter;
+  }
+  int getDropAfter() {
+    if (!_prefs.containsKey(_dropAfterKey)){
+      return _defaultDropAfter;
+    }
+    return _prefs[_dropAfterKey];
   }
 }

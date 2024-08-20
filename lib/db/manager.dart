@@ -21,11 +21,12 @@ final class StorageManager {
       inspector: false,
     ).then((Isar db){
       _db = db;
+      _logger.i("initialized");
     }).catchError((Object? e) {
       const msg = "failed to open db";
       _logger.e(msg, error: e);
       throw msg;
-    });;
+    });
   }
 
   Future<List<Secret>> listSecrets(String title) {
@@ -33,7 +34,7 @@ final class StorageManager {
       titleContains(title).
       findAll().
       catchError((Object? e) {
-      const msg = "failed to delete secret";
+      const msg = "failed to list secrets";
       _logger.e(msg, error: e);
       throw msg;
     });
@@ -54,7 +55,7 @@ final class StorageManager {
 
   Future<void> deleteSecret(String strId) {
     if (_db == null) {
-      throw "failed to add secret: db is null";
+      throw "failed to delete secret: db is null";
     }
     Id id;
     id = Id.parse(strId);
@@ -69,10 +70,10 @@ final class StorageManager {
 
   Future<int> countSecrets() {
     if (_db == null) {
-      throw "failed to add secret: db is null";
+      throw "failed to count secret: db is null";
     }
     return _db!.secrets.count().catchError((Object? e) {
-      const msg = "failed to delete secret";
+      const msg = "failed to count secrets";
       _logger.e(msg, error: e);
       throw msg;
     });
@@ -83,9 +84,14 @@ final class StorageManager {
   }
   Future<void> drop(){
     if (_db == null) {
-      throw "failed to add secret: db is null";
+      throw "failed to drop secrets: db is null";
     }
-    _logger.i("deinitializing");
-    return _db!.secrets.clear();
+    return _db!.writeTxn(() {
+      return _db!.secrets.clear();
+    }).catchError((Object? e) {
+      const msg = "failed to drop secrets";
+      _logger.e(msg, error: e);
+      throw msg;
+    });
   }
 }
