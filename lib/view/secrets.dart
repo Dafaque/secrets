@@ -39,7 +39,7 @@ class _SecretsViewState extends State<SecretsView> {
             onChanged: _search,
           ),
           actions: [
-            IconButton(onPressed: _showSettingsModal, icon: Icon(Icons.settings))
+            IconButton(onPressed: _showSettingsModal, icon: const Icon(Icons.settings))
           ],
         ),
         body: _content(context),
@@ -129,6 +129,11 @@ class _SecretsViewState extends State<SecretsView> {
   }
   Widget _content(BuildContext context) {
     if (_secrets == null) {
+      if (_totalSecrets == 0) {
+        return const Center(
+          child: Text("You don't have any secrets. Create one!"),
+        );
+      }
       return Center(
           child: RichText(text: TextSpan(
               text: "Start typing to find among your",
