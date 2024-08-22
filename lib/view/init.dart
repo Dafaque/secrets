@@ -9,7 +9,7 @@ class InitView extends StatefulWidget {
 
 const _messageEnterPin = "Create PIN";
 const _messageVerifyPin = "Verify PIN";
-const _messagePinMissmatch = "PIN does not match";
+const _messagePinMismatch = "PIN does not match";
 
 const int _pinLen = 6;
 class _InitViewState extends State<InitView> {
@@ -45,7 +45,7 @@ class _InitViewState extends State<InitView> {
       _controller.reset();
       setState(() {
         _pin = null;
-        _message = _messagePinMissmatch;
+        _message = _messagePinMismatch;
       });
       return;
     }
