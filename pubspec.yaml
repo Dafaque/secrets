@@ -1,7 +1,7 @@
 name: secrets
 description: "Local secrets storage"
 version: 1.0.0+1
-isar_version: &isar_version 3.1.0+1 # define the version to be used
+isar_version: &isar_version 3.1.0+1
 
 environment:
   sdk: ^3.5.0
@@ -19,6 +19,7 @@ dependencies:
   pin_keyboard: ^1.1.2
   spoiler_widget: ^1.0.4
   numberpicker: ^2.1.2
+  package_info_plus: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -26,7 +27,23 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   isar_generator: *isar_version
   build_runner: any
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/ic_launcher/res/mipmap-xxxhdpi/ic_launcher.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Anonymous Pro
+      fonts:
+        - asset: assets/font/AnonymousPro-Bold.ttf
+          weight: 800
+        - asset: assets/font/AnonymousPro-Italic.ttf
+          style: italic
+        - asset: assets/font/AnonymousPro-Regular.ttf
+
 

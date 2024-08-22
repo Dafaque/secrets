@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 const String _cfgFileName = "config.json";
 const String _dropAfterKey = "drop_after";
-const String _checkSumKey = "checksum";
+// const String _checkSumKey = "checksum";
 const int _defaultDropAfter = 3;
 
 
@@ -17,6 +18,9 @@ class PreferencesManager {
   Map<String, dynamic> _prefs = {
     _dropAfterKey: _defaultDropAfter,
   };
+  String _appVersion = "";
+  String _appBuildNumber = "";
+  String _appName = "";
 
   PreferencesManager(this._logger);
 
@@ -39,6 +43,12 @@ class PreferencesManager {
       }).then((String cfgFileContent){
         _prefs = jsonDecode(cfgFileContent);
         _logger.i("config file loaded: $_prefs");
+      }).then((_){
+        return PackageInfo.fromPlatform();
+      }).then((PackageInfo pi){
+        _appBuildNumber = pi.buildNumber;
+        _appVersion = pi.version;
+        _appName = pi.appName;
       }).catchError((Object? e, StackTrace _){
         _logger.e("failed to init preferences", error: e);
       });
@@ -79,5 +89,15 @@ class PreferencesManager {
       return _defaultDropAfter;
     }
     return _prefs[_dropAfterKey];
+  }
+
+  String getAppName() {
+    return _appName;
+  }
+  String getAppBuildNumber(){
+    return _appBuildNumber;
+  }
+  String getAppVersion(){
+    return _appVersion;
   }
 }

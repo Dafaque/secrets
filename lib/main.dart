@@ -6,6 +6,7 @@ import 'package:secrets/db/manager.dart';
 import 'package:secrets/view/main.dart';
 
 // https://material-foundation.github.io/material-theme-builder/
+// https://romannurik.github.io/AndroidAssetStudio/
 const primaryColor = Color(0xFFb0f953);
 
 void main() {
@@ -44,6 +45,7 @@ class Entry extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        fontFamily: "Anonymous Pro",
         useMaterial3: true,
         primaryColor: primaryColor,
         colorScheme: const ColorScheme(

@@ -37,7 +37,7 @@ class _SettingsViewState extends State<SettingsView> {
         children: [
           Card(
             child: ListTile(
-              title: const Text("Drop after"),
+              title: const Text("Drop After"),
               subtitle: const Text("Delete secrets after number of incorrect attempts to enter PIN"),
               trailing: NumberPicker(
                 itemCount: 1,
@@ -50,6 +50,22 @@ class _SettingsViewState extends State<SettingsView> {
               ),
             ),
           ),
+          Card(
+            child: ListTile(
+              title: const Text("App Name"),
+              subtitle: Text(widget._prefs.getAppName()),
+            ),
+          ),Card(
+            child: ListTile(
+              title: const Text("App Version"),
+              subtitle: Text(widget._prefs.getAppVersion()),
+            ),
+          ),Card(
+            child: ListTile(
+              title: const Text("App Build Number"),
+              subtitle: Text(widget._prefs.getAppBuildNumber()),
+            ),
+          )
         ],
       ),
     );
