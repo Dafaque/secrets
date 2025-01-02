@@ -196,7 +196,7 @@ class _SecretsViewState extends State<SecretsView> {
     Navigator.of(context)
         .push(MaterialPageRoute(
             builder: (BuildContext ctx) =>
-                SettingsView(widget._prefs, widget._db)))
+                SettingsView(widget._prefs, widget._db, widget._enc)))
         .then((_) {
       widget._prefs.save().then((_) {
         return _updateData();

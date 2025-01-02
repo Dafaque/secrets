@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:secrets/db/manager.dart';
 import 'package:secrets/preferences/manager.dart';
+import 'package:secrets/view/sync.dart';
+import 'package:secrets/crypto/manager.dart';
 
 class SettingsView extends StatefulWidget {
   final PreferencesManager _prefs;
   final StorageManager _db;
-  const SettingsView(this._prefs, this._db, {super.key});
+  final EncryptionManager _enc;
+  const SettingsView(this._prefs, this._db, this._enc, {super.key});
   @override
   State<SettingsView> createState() => _SettingsViewState();
 }
@@ -57,6 +60,29 @@ class _SettingsViewState extends State<SettingsView> {
                     onPressed: _dropAfter < 9
                         ? () => _onDropAfterChanged(_dropAfter + 1)
                         : null,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text("Sync"),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SyncView(widget._db, widget._enc, widget._prefs),
+                      ),
+                    ),
+                    child: const Text('Host'),
+                  ),
+                  ElevatedButton(
+                    onPressed: null,
+                    child: const Text('Client'),
                   ),
                 ],
               ),

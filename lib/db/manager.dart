@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:isar/isar.dart';
@@ -19,7 +18,7 @@ final class StorageManager {
       directory: _prefs.getDocumentsDirectory().path,
       name: "secrets",
       inspector: false,
-    ).then((Isar db){
+    ).then((Isar db) {
       _db = db;
       _logger.i("initialized");
     }).catchError((Object? e) {
@@ -30,10 +29,11 @@ final class StorageManager {
   }
 
   Future<List<Secret>> listSecrets(String title) {
-    return _db!.secrets.filter().
-      titleContains(title).
-      findAll().
-      catchError((Object? e) {
+    return _db!.secrets
+        .filter()
+        .titleContains(title)
+        .findAll()
+        .catchError((Object? e) {
       const msg = "failed to list secrets";
       _logger.e(msg, error: e);
       throw msg;
@@ -79,10 +79,15 @@ final class StorageManager {
     });
   }
 
-  void done(){
+  Future<List<Secret>> getAll() {
+    return _db!.secrets.where().findAll();
+  }
+
+  void done() {
     _db?.close();
   }
-  Future<void> drop(){
+
+  Future<void> drop() {
     if (_db == null) {
       throw "failed to drop secrets: db is null";
     }
