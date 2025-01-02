@@ -10,80 +10,60 @@ class NewSecretView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(
-        title: const Text('Create new secret'),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            // mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextFormField(
-                    decoration: const InputDecoration(labelText:"Title"),
-                    controller: _titleTEC,
-                    validator: _titleValidator,
-                    autofocus: true,
-                  ),
-                  TextFormField(
-                    decoration: const InputDecoration(labelText:"Value"),
-                    controller: _valueTEC,
-                    validator: _valueValidator,
-                  ),
-                  TextButton(
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("Save")
-                      ],
-                    ),
-                    onPressed: () {
-                      if (!(_formKey.currentState?.validate() ?? false)) {
-                        return;
-                      }
-                      Navigator.of(context).pop(_buildSecret());
-                    },
-                  ),
-                ],
-              ),
-              const Padding(
-                padding:  EdgeInsets.all(20.0),
-                child: Row(
-                    children: <Widget>[
-                      Expanded(
-                          child: Divider()
-                      ),
-                      Text("OR"),
-                      Expanded(
-                          child: Divider()
-                      ),
-                    ]
-                ),
-              ),
-              const Text('Swipe down to discard'),
-              const Icon(Icons.arrow_downward),
-            ],
-          ),
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Create new secret'),
+          centerTitle: true,
         ),
-      )
-    );
+        body: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              // mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Title"),
+                      controller: _titleTEC,
+                      validator: _titleValidator,
+                      autofocus: true,
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: "Value"),
+                      controller: _valueTEC,
+                      validator: _valueValidator,
+                    ),
+                    TextButton(
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [Text("Save")],
+                      ),
+                      onPressed: () {
+                        if (!(_formKey.currentState?.validate() ?? false)) {
+                          return;
+                        }
+                        Navigator.of(context).pop(_buildSecret());
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   Secret _buildSecret() {
     return Secret()
-        ..title=_titleTEC.text
-        ..value=_valueTEC.text
-        ..createdUTC=DateTime.now()
-        ..type=SecretType.text;
+      ..title = _titleTEC.text
+      ..value = _valueTEC.text
+      ..createdUTC = DateTime.now()
+      ..type = SecretType.text;
   }
 
   String? _titleValidator(String? val) {
@@ -92,6 +72,7 @@ class NewSecretView extends StatelessWidget {
     }
     return null;
   }
+
   String? _valueValidator(String? val) {
     if (val == null || val.isEmpty) {
       return "value cannot be empty";

@@ -1,6 +1,6 @@
 name: secrets
 description: "Local secrets storage"
-version: 1.0.0+1
+version: 1.1.0+1
 isar_version: &isar_version 3.1.0+1
 
 environment:
@@ -18,7 +18,6 @@ dependencies:
   encrypt: ^5.0.3
   pin_keyboard: ^1.1.2
   spoiler_widget: ^1.0.4
-  numberpicker: ^2.1.2
   package_info_plus: ^8.0.2
 
 dev_dependencies:
