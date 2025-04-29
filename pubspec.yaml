@@ -1,7 +1,6 @@
 name: secrets
 description: "Local secrets storage"
-version: 1.1.0+1
-isar_version: &isar_version 3.1.0+1
+version: 1.2.0+2
 
 environment:
   sdk: ^3.5.0
@@ -12,21 +11,25 @@ dependencies:
   logger: ^2.4.0
   loading_indicator: ^3.1.1
   path_provider: ^2.1.4
-  isar: *isar_version
-  isar_flutter_libs: *isar_version
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
   crypto: ^3.0.5
   encrypt: ^5.0.3
   pin_keyboard: ^1.1.2
   spoiler_widget: ^1.0.4
   package_info_plus: ^8.0.2
+  flutter_zxing: ^2.0.0
+  barcode: ^2.2.9
+  flutter_svg: ^2.0.9
+  camera: ^0.10.5+9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
-  isar_generator: *isar_version
+  flutter_lints: ^5.0.0
+  isar_generator: ^3.1.0+1
   build_runner: any
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.3
 
 flutter_launcher_icons:
   android: "launcher_icon"

@@ -4,6 +4,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/manager.dart';
 import 'package:secrets/preferences/manager.dart';
+import 'package:secrets/sync/manager.dart';
 import 'package:secrets/view/init.dart';
 import 'package:secrets/view/secrets.dart';
 import 'package:secrets/view/unlock.dart';
@@ -14,7 +15,9 @@ class MainView extends StatefulWidget {
   final StorageManager _db;
   final EncryptionManager _enc;
   final PreferencesManager _prefs;
-  const MainView(this._db, this._enc, this._prefs, {super.key});
+  final SyncManager _syncManager;
+  const MainView(this._db, this._enc, this._prefs, this._syncManager,
+      {super.key});
   @override
   State<MainView> createState() => _MainViewState();
 }
@@ -55,7 +58,8 @@ class _MainViewState extends State<MainView> {
           child: Text("Storage deinitialized"),
         );
       case _ViewState.ready:
-        return SecretsView(widget._db, widget._enc, widget._prefs);
+        return SecretsView(
+            widget._db, widget._enc, widget._prefs, widget._syncManager);
       case _ViewState.error:
         return Center(
           child: Text(_errMsg ?? "unknown error"),

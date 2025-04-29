@@ -1,0 +1,2 @@
+/home/dafaque/StudioProjects/secrets/android/app/.cxx/Debug/2m3g483x/x86/CMakeFiles/rebuild_cache.dir
+/home/dafaque/StudioProjects/secrets/android/app/.cxx/Debug/2m3g483x/x86/CMakeFiles/edit_cache.dir

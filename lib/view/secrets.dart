@@ -4,6 +4,7 @@ import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/manager.dart';
 import 'package:secrets/db/secret.dart';
 import 'package:secrets/preferences/manager.dart';
+import 'package:secrets/sync/manager.dart';
 import 'package:secrets/view/new_secret.dart';
 import 'package:secrets/view/secret.dart';
 import 'package:secrets/view/settings.dart';
@@ -12,7 +13,9 @@ class SecretsView extends StatefulWidget {
   final StorageManager _db;
   final EncryptionManager _enc;
   final PreferencesManager _prefs;
-  const SecretsView(this._db, this._enc, this._prefs, {super.key});
+  final SyncManager _syncManager;
+  const SecretsView(this._db, this._enc, this._prefs, this._syncManager,
+      {super.key});
 
   @override
   State<SecretsView> createState() => _SecretsViewState();
@@ -196,7 +199,7 @@ class _SecretsViewState extends State<SecretsView> {
     Navigator.of(context)
         .push(MaterialPageRoute(
             builder: (BuildContext ctx) =>
-                SettingsView(widget._prefs, widget._db, widget._enc)))
+                SettingsView(widget._prefs, widget._db, widget._syncManager)))
         .then((_) {
       widget._prefs.save().then((_) {
         return _updateData();

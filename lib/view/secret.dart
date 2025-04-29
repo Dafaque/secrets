@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/secret.dart';
-import 'package:spoiler_widget/models/text_spoiler_configs.dart';
-import 'package:spoiler_widget/spoiler_text_widget.dart';
+import 'package:spoiler_widget/spoiler_widget.dart';
 
 class SecretView extends StatefulWidget {
   final Secret _secret;
@@ -39,17 +38,18 @@ class _SecretViewState extends State<SecretView> {
           child: ListTile(
             title: const Text("Value"),
             subtitle: RepaintBoundary(
-              child: SpoilerTextWidget(
-                configuration: TextSpoilerConfiguration(
+              child: SpoilerText(
+                config: const TextSpoilerConfig(
                   isEnabled: true,
                   maxParticleSize: 1.5,
                   particleDensity: .4,
-                  speedOfParticles: 0.3,
+                  particleSpeed: 0.3,
                   fadeRadius: 3,
-                  fadeAnimation: true,
-                  enableGesture: true,
-                  selection:
-                      TextSelection(baseOffset: 0, extentOffset: val.length),
+                  enableFadeAnimation: true,
+                  enableGestureReveal: true,
+
+                  // selection:
+                  //     TextSelection(baseOffset: 0, extentOffset: val.length),
                 ),
                 text: val,
               ),

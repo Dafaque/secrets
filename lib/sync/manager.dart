@@ -1,3 +1,4 @@
+import 'package:logger/logger.dart';
 import 'package:secrets/crypto/manager.dart';
 import 'package:secrets/db/manager.dart';
 import 'dart:io';
@@ -8,9 +9,11 @@ class SyncManager {
   final StorageManager _db;
   final EncryptionManager _enc;
   final PreferencesManager _prefs;
+  final Logger _logger;
   ServerSocket? _server;
+  Socket? _client;
 
-  SyncManager(this._db, this._enc, this._prefs);
+  SyncManager(this._logger, this._db, this._enc, this._prefs);
 
   Future<String> getLocalIpAddress() async {
     return NetworkInterface.list().then((interfaces) {
@@ -33,7 +36,7 @@ class SyncManager {
       }
       return ServerSocket.bind(InternetAddress(localIp), 0).then((server) {
         _server = server;
-        print('TCP Server listening on $localIp:${_server!.port}');
+        _logger.d('TCP Server listening on $localIp:${_server!.port}');
         _server!.listen(handleConnection);
         return server.port;
       });
@@ -43,14 +46,46 @@ class SyncManager {
   Future<void> stopServer() async {
     await _server?.close();
     _server = null;
-    print('TCP Server stopped');
+    _logger.d('TCP Server stopped');
+  }
+
+  Future<void> connect(int port) async {
+    final localIp = await getLocalIpAddress();
+    if (localIp.isEmpty) {
+      throw 'Could not find local IP address';
+    }
+
+    _client = await Socket.connect(localIp, port);
+    _logger.d('Connected to server at $localIp:$port');
+
+    // Request data
+    _client!.write('get');
+
+    // Listen for incoming data
+    _client!.listen(
+      (data) {
+        final secretStr = String.fromCharCodes(data);
+        _logger.d('Received secret: $secretStr');
+        // TODO: Parse and store the secret
+      },
+      onError: (error) {
+        _logger.e('Error receiving data', error: error);
+        _client?.close();
+        _client = null;
+      },
+      onDone: () {
+        _logger.d('Connection closed');
+        _client?.close();
+        _client = null;
+      },
+    );
   }
 
   handleConnection(Socket socket) {
-    print(
+    _logger.d(
         'Client connected from ${socket.remoteAddress.address}:${socket.remotePort}');
     socket.listen((data) {
-      print('Client sent data: ${String.fromCharCodes(data)}');
+      _logger.d('Client sent data: ${String.fromCharCodes(data)}');
       var msg = String.fromCharCodes(data);
       if (msg == 'get') {
         _db.getAll().then((secrets) {
