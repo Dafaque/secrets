@@ -30,10 +30,13 @@ class _SyncHostViewState extends State<SyncHostView> {
     widget._syncManager.startServer().then(_onServerStarted);
   }
 
-  void _onServerStarted(int port) {
+  void _onServerStarted(AddrInfo? info) {
+    if (info == null) {
+      return;
+    }
     try {
       final result = zx.encodeBarcode(
-        contents: port.toString(),
+        contents: info.toUrl(),
         params: EncodeParams(
           format: Format.aztec,
           width: 300,
@@ -52,18 +55,9 @@ class _SyncHostViewState extends State<SyncHostView> {
               numChannels: 1,
             );
 
-            // Check some sample pixels from original image
-            print('Sample pixels from original image:');
-            for (var i = 0; i < 5; i++) {
-              final x = i * 60;
-              final y = i * 60;
-              final pixel = img.getPixel(x, y);
-              final gray = imglib.getLuminance(pixel);
-              print('Pixel at ($x,$y): gray=$gray');
-            }
-
             // Convert to RGBA and apply theme colors
-            final themeColor = Theme.of(context).colorScheme.onSurface;
+            final qrColor = Theme.of(context).colorScheme.surface;
+            final bgColor = Theme.of(context).colorScheme.primary;
             final rgbaImg =
                 imglib.Image(width: 300, height: 300, numChannels: 4);
 
@@ -74,12 +68,13 @@ class _SyncHostViewState extends State<SyncHostView> {
 
                 if (gray < 50) {
                   // Keep the lower threshold that worked
-                  // Dark pixels become theme color
-                  rgbaImg.setPixelRgba(x, y, themeColor.red, themeColor.green,
-                      themeColor.blue, 255);
+                  // Dark pixels become surface color
+                  rgbaImg.setPixelRgba(
+                      x, y, qrColor.red, qrColor.green, qrColor.blue, 255);
                 } else {
-                  // Light pixels become transparent
-                  rgbaImg.setPixelRgba(x, y, 0, 0, 0, 0);
+                  // Light pixels become primary color background
+                  rgbaImg.setPixelRgba(
+                      x, y, bgColor.red, bgColor.green, bgColor.blue, 255);
                 }
               }
             }
@@ -137,18 +132,39 @@ class _SyncHostViewState extends State<SyncHostView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (_barcodeImage != null)
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 300,
-                      maxHeight: 300,
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 4,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .shadow
+                              .withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Image.memory(
-                          _barcodeImage!,
-                          fit: BoxFit.contain,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 300,
+                        maxHeight: 300,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Image.memory(
+                            _barcodeImage!,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),

@@ -5,6 +5,55 @@ import 'dart:io';
 
 import 'package:secrets/preferences/manager.dart';
 
+class AddrInfo {
+  final String ip;
+  final int port;
+
+  AddrInfo(this.ip, this.port);
+
+  static AddrInfo? fromString(String str) {
+    try {
+      if (!str.startsWith('addr')) return null;
+      final parts = str.substring(4).split(':');
+      if (parts.length != 2) return null;
+      final ip = parts[0];
+      final port = int.parse(parts[1]);
+      return AddrInfo(ip, port);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String toUrl() {
+    return 'sync://?ip=$ip&port=$port';
+  }
+
+  static AddrInfo? fromUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      if (uri.scheme != 'sync') return null;
+
+      final ip = uri.queryParameters['ip'];
+      final portStr = uri.queryParameters['port'];
+      if (ip == null || portStr == null) return null;
+
+      final port = int.parse(portStr);
+      return AddrInfo(ip, port);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is AddrInfo && other.ip == ip && other.port == port;
+  }
+
+  @override
+  int get hashCode => ip.hashCode ^ port.hashCode;
+}
+
 class SyncManager {
   final StorageManager _db;
   final EncryptionManager _enc;
@@ -29,16 +78,16 @@ class SyncManager {
     });
   }
 
-  Future<int> startServer() async {
+  Future<AddrInfo?> startServer() async {
     return getLocalIpAddress().then((localIp) {
       if (localIp == '') {
-        return 0;
+        return null;
       }
-      return ServerSocket.bind(InternetAddress(localIp), 0).then((server) {
+      return ServerSocket.bind(InternetAddress.anyIPv4, 0).then((server) {
         _server = server;
         _logger.d('TCP Server listening on $localIp:${_server!.port}');
         _server!.listen(handleConnection);
-        return server.port;
+        return AddrInfo(localIp, server.port);
       });
     });
   }

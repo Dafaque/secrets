@@ -15,30 +15,41 @@ class _SyncClientViewState extends State<SyncClientView> {
 
   void _handleScannedCode(String? code) {
     if (code == null) return;
-    try {
-      final port = int.parse(code);
-      // Show the parsed port value
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Found port: $port'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Scanned code: $code')),
+    );
 
-      widget._syncManager.connect(port).then((_) {
-        // Handle successful connection
-        Navigator.of(context).pop(true);
-      }).catchError((error) {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Connection failed: $error')),
-        );
-      });
-    } catch (e) {
+    AddrInfo? addrInfo;
+    if (code.startsWith('sync://')) {
+      addrInfo = AddrInfo.fromUrl(code);
+    } else if (code.startsWith('addr')) {
+      addrInfo = AddrInfo.fromString(code);
+    }
+
+    if (addrInfo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid QR code format')),
       );
+      return;
     }
+
+    // Show the parsed address
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Found server at ${addrInfo.ip}:${addrInfo.port}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    widget._syncManager.connect(addrInfo.port).then((_) {
+      // Handle successful connection
+      Navigator.of(context).pop(true);
+    }).catchError((error) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Connection failed: $error')),
+      );
+    });
   }
 
   @override
