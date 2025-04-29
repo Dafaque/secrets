@@ -20,7 +20,7 @@ class _SecretViewState extends State<SecretView> {
   void initState() {
     try {
       val = widget._enc.decryptAES(widget._secret.value!);
-    } catch (_, __) {
+    } catch (_) {
       val = "Unable to decrypt this secret";
       _secretDecrypted = false;
     }

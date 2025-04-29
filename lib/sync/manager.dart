@@ -11,19 +11,6 @@ class AddrInfo {
 
   AddrInfo(this.ip, this.port);
 
-  static AddrInfo? fromString(String str) {
-    try {
-      if (!str.startsWith('addr')) return null;
-      final parts = str.substring(4).split(':');
-      if (parts.length != 2) return null;
-      final ip = parts[0];
-      final port = int.parse(parts[1]);
-      return AddrInfo(ip, port);
-    } catch (e) {
-      return null;
-    }
-  }
-
   String toUrl() {
     return 'sync://?ip=$ip&port=$port';
   }
@@ -98,14 +85,9 @@ class SyncManager {
     _logger.d('TCP Server stopped');
   }
 
-  Future<void> connect(int port) async {
-    final localIp = await getLocalIpAddress();
-    if (localIp.isEmpty) {
-      throw 'Could not find local IP address';
-    }
-
-    _client = await Socket.connect(localIp, port);
-    _logger.d('Connected to server at $localIp:$port');
+  Future<void> connect(AddrInfo info) async {
+    _client = await Socket.connect(info.ip, info.port);
+    _logger.d('Connected to server at ${info.ip}:${info.port}');
 
     // Request data
     _client!.write('get');
