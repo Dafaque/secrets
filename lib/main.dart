@@ -28,7 +28,7 @@ void main() {
   PreferencesManager pManager = PreferencesManager(logger);
   EncryptionManager encManager = EncryptionManager(logger, pManager);
   StorageManager db = StorageManager(logger, pManager);
-  SyncManager syncManager = SyncManager(logger, db, encManager, pManager);
+  SyncManager syncManager = SyncManager(logger, pManager, db, encManager);
 
   runApp(Entry(db, encManager, pManager, syncManager));
 }

@@ -4,6 +4,7 @@ import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:secrets/sync/manager.dart';
+import 'dart:async';
 
 class SyncHostView extends StatefulWidget {
   final SyncManager _syncManager;
@@ -17,15 +18,32 @@ class _SyncHostViewState extends State<SyncHostView> {
   Uint8List? _barcodeImage;
   bool _isServerRunning = false;
   String? _errorMessage;
+  final List<SyncStatus> _statusHistory = [];
+  bool _isClientConnected = false;
+  StreamSubscription<SyncStatus>? _statusSubscription;
 
   @override
   void initState() {
     super.initState();
     _startServer();
+    _statusSubscription = widget._syncManager.status.listen((status) {
+      if (mounted) {
+        setState(() {
+          _statusHistory.add(status);
+          if (status.state == SyncState.waitingForClient) {
+            _isClientConnected = false;
+          } else if (status.state == SyncState.processing ||
+              status.state == SyncState.done) {
+            _isClientConnected = true;
+          }
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _statusSubscription?.cancel();
     widget._syncManager.stopServer();
     super.dispose();
   }
@@ -156,6 +174,55 @@ class _SyncHostViewState extends State<SyncHostView> {
     );
   }
 
+  Widget _buildStatusList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _statusHistory.length,
+        itemBuilder: (context, index) {
+          final status = _statusHistory[index];
+          IconData icon;
+          Color color;
+
+          switch (status.state) {
+            case SyncState.processing:
+              icon = Icons.sync;
+              color = Theme.of(context).colorScheme.primary;
+              break;
+            case SyncState.error:
+              icon = Icons.error_outline;
+              color = Theme.of(context).colorScheme.error;
+              break;
+            case SyncState.done:
+              icon = Icons.check_circle_outline;
+              color = Theme.of(context).colorScheme.primary;
+              break;
+            case SyncState.waitingForClient:
+              icon = Icons.hourglass_empty;
+              color = Theme.of(context).colorScheme.secondary;
+              break;
+            default:
+              icon = Icons.info_outline;
+              color = Theme.of(context).colorScheme.secondary;
+          }
+
+          return ListTile(
+            leading: Icon(icon, color: color),
+            title: Text(
+              status.message,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            subtitle: Text(
+              status.state.toString().split('.').last,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
+                  ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,17 +231,21 @@ class _SyncHostViewState extends State<SyncHostView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _errorMessage != null ? _buildError() : _buildQrCode(),
+            if (!_isClientConnected && _errorMessage == null) _buildQrCode(),
+            if (_errorMessage != null) _buildError(),
+            if (_isClientConnected) _buildStatusList(),
             const SizedBox(height: 16),
             Text(
               _isServerRunning ? 'Server is running' : 'Starting server...',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Scan this QR code to sync',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            if (!_isClientConnected) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Scan this QR code to sync',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
           ],
         ),
       ),

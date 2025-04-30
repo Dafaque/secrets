@@ -22,7 +22,7 @@ class Secret {
       'id': id,
       'title': title,
       'value': value,
-      'type': type,
+      'type': type.toString(),
     });
   }
 
@@ -32,7 +32,8 @@ class Secret {
       ..id = map['id']
       ..title = map['title']
       ..value = map['value']
-      ..type = SecretType.values.firstWhere((e) => e.name == map['type']);
+      ..type = SecretType.values
+          .firstWhere((e) => map['type'].toString().endsWith(e.name));
   }
 }
 
