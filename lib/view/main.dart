@@ -65,7 +65,6 @@ class _MainViewState extends State<MainView> {
           child: Text(_errMsg ?? "unknown error"),
         );
       case _ViewState.loading:
-      default:
         return const Center(
           child: LoadingIndicator(
             indicatorType: Indicator.ballClipRotateMultiple,

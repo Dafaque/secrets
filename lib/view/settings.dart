@@ -78,7 +78,7 @@ class _SettingsViewState extends State<SettingsView> {
                         builder: (context) => SyncHostView(widget._syncManager),
                       ),
                     ),
-                    child: const Text('Host'),
+                    child: const Text('Send'),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).push(
@@ -87,7 +87,7 @@ class _SettingsViewState extends State<SettingsView> {
                             SyncClientView(widget._syncManager),
                       ),
                     ),
-                    child: const Text('Client'),
+                    child: const Text('Receive'),
                   ),
                 ],
               ),

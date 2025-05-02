@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:secrets/sync/manager.dart';
+import 'package:secrets/sync/model.dart';
 import 'dart:async';
 
 class SyncClientView extends StatefulWidget {
@@ -52,17 +53,9 @@ class _SyncClientViewState extends State<SyncClientView> {
       return;
     }
 
-    _showServerInfo(addrInfo);
+    _statusHistory.add(SyncStatus(SyncState.waitingForHost,
+        'Connecting to ${addrInfo.ip}:${addrInfo.port}'));
     _connectToServer(addrInfo);
-  }
-
-  void _showServerInfo(AddrInfo addrInfo) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Found server at ${addrInfo.ip}:${addrInfo.port}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   void _showError(String message) {

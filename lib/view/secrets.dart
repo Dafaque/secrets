@@ -176,8 +176,6 @@ class _SecretsViewState extends State<SecretsView> {
       case SecretType.text:
         leadingIcon = Icons.text_snippet;
         break;
-      default:
-        leadingIcon = Icons.question_mark;
     }
 
     return SwipeForDeleteComponent(

@@ -4,6 +4,7 @@ import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:secrets/sync/manager.dart';
+import 'package:secrets/sync/model.dart';
 import 'dart:async';
 
 class SyncHostView extends StatefulWidget {
@@ -135,7 +136,7 @@ class _SyncHostViewState extends State<SyncHostView> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
