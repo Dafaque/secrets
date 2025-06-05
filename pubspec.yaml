@@ -1,6 +1,6 @@
 name: secrets
 description: "Local secrets storage"
-version: 1.2.1+dev
+version: 1.2.1+2
 
 environment:
   sdk: ^3.5.0
